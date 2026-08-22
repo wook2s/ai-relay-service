@@ -5,6 +5,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -42,5 +43,9 @@ public class JobService {
                     job.setStartedAt(LocalDateTime.now());
                     return jobRepository.save(job);
                 });
+    }
+
+    public Flux<Job> findQueuedJobs() {
+        return jobRepository.findByStatus(JobStatus.QUEUED);
     }
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -99,5 +100,30 @@ public class JobServiceTest {
 
         verify(jobRepository).findById(id);
         verify(jobRepository).save(saved);
+    }
+
+    @Test
+    void findQueuedJobs() {
+        String id = "20260822-test";
+
+        Job saved = new Job();
+        saved.setId(id);
+        saved.setPrompt("테스트");
+        saved.setStatus(JobStatus.QUEUED);
+        saved.setRetryCount(0);
+
+        when(jobRepository.findByStatus(JobStatus.QUEUED))
+            .thenReturn(Flux.just(saved));
+
+        StepVerifier.create(jobService.findQueuedJobs())
+                .assertNext(job -> {
+                    assertEquals("20260822-test", job.getId());
+                    assertEquals("테스트", job.getPrompt());
+                    assertEquals(JobStatus.QUEUED, job.getStatus());
+                    assertEquals(0, job.getRetryCount());
+                })
+                .verifyComplete();
+
+        verify(jobRepository).findByStatus(JobStatus.QUEUED);
     }
 }
