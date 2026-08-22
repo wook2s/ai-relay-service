@@ -1,5 +1,6 @@
 package com.example.aiapi.job;
 
+import com.example.aiapi.job.dto.JobResponseDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;

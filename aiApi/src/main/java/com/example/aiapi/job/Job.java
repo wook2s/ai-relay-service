@@ -1,5 +1,6 @@
 package com.example.aiapi.job;
 
+import com.example.aiapi.job.dto.JobResponseDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,4 +36,7 @@ public class Job implements Persistable<String> {
         return newEntity;
     }
 
+    private JobResponseDTO toResponse(Job job) {
+        return null;
+    }
 }
