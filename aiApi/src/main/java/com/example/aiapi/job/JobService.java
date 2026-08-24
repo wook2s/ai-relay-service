@@ -1,9 +1,7 @@
 package com.example.aiapi.job;
 
-import com.example.aiapi.job.dto.JobResponseDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,5 +45,35 @@ public class JobService {
 
     public Flux<Job> findQueuedJobs() {
         return jobRepository.findByStatus(JobStatus.QUEUED);
+    }
+
+    public Mono<Job> completeJob(String id, String result) {
+        return jobRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("job not found +" + id)))
+                .flatMap(job -> {
+                    job.setStatus(JobStatus.COMPLETED);
+                    job.setResult(result);
+                    job.setCompletedAt(LocalDateTime.now());
+                    return jobRepository.save(job);
+                });
+    }
+
+    public Mono<Job> failJob(String id) {
+        return jobRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("job not found + " + id)))
+                .flatMap(job ->  {
+                    job.setStatus(JobStatus.FAILED);
+                    return jobRepository.save(job);
+                });
+    }
+
+    public Mono<Job> retryJob(String id) {
+        return jobRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("job not found + " + id)))
+                .flatMap(job -> {
+                    job.setStatus(JobStatus.QUEUED);
+                    job.setRetryCount(job.getRetryCount() + 1);
+                    return jobRepository.save(job);
+                });
     }
 }
