@@ -35,8 +35,4 @@ public class Job implements Persistable<String> {
     public boolean isNew() {
         return newEntity;
     }
-
-    private JobResponseDTO toResponse(Job job) {
-        return null;
-    }
 }

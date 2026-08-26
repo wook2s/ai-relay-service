@@ -12,10 +12,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 public class JobWorkerTest {
@@ -37,15 +35,17 @@ public class JobWorkerTest {
         job2.setId("job-2");
         job2.setStatus(JobStatus.QUEUED);
 
-        when(jobService.findQueuedJobs())
-            .thenReturn(Flux.just(job1, job2));
+        given(jobService.findQueuedJobs())
+                .willReturn(Flux.just(job1, job2));
 
-        when(jobProcessor.process("job-1")).thenReturn(Mono.empty());
-        when(jobProcessor.process("job-2")).thenReturn(Mono.empty());
+        given(jobProcessor.process("job-1"))
+                .willReturn(Mono.empty());
+        given(jobProcessor.process("job-2"))
+                .willReturn(Mono.empty());
 
         StepVerifier.create(jobWorker.processQueuedJobs()).verifyComplete();
 
-        verify(jobProcessor).process("job-1");
-        verify(jobProcessor).process("job-2");
+        then(jobProcessor).should().process("job-1");
+        then(jobProcessor).should().process("job-2");
     }
 }

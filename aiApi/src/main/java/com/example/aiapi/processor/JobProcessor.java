@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
 public class JobProcessor {
 
     private final JobService jobService;
@@ -16,21 +15,36 @@ public class JobProcessor {
     @Qualifier("mockAiClient")
     private final AiClient aiClient;
 
+    public JobProcessor(
+            JobService jobService,
+            @Qualifier("geminiAiClient") AiClient aiClient
+    ) {
+        this.jobService = jobService;
+        this.aiClient = aiClient;
+    }
+
     public Mono<Void> process(String id) {
         return jobService.startJob(id)
-                .flatMap(job ->
-                        aiClient.generate(job.getPrompt())
-                                .flatMap(result ->
-                                        jobService.completeJob(id, result)
-                                )
-                                .onErrorResume(error -> {
-                                    if (job.getRetryCount() < 3) {
-                                        return jobService.retryJob(id);
-                                    } else {
-                                        return jobService.failJob(id);
-                                    }
-                                })
-                )
+                .flatMap(job -> {
+                    System.out.println("START job = " + System.identityHashCode(job));
+                    System.out.println("START retryCount = " + job.getRetryCount());
+
+                    return aiClient.generate(job.getPrompt())
+                            .flatMap(result ->
+                                    jobService.completeJob(id, result)
+                            )
+                            .onErrorResume(error -> {
+                                System.out.println("ERROR job = " + System.identityHashCode(job));
+                                System.out.println("ERROR retryCount = " + job.getRetryCount());
+                                System.out.println("ERROR = " + error);
+
+                                if (job.getRetryCount() < 3) {
+                                    return jobService.retryJob(id);
+                                }
+
+                                return jobService.failJob(id);
+                            });
+                })
                 .then();
     }
 }

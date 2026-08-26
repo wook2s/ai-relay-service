@@ -21,8 +21,8 @@ WebFlux + R2DBC 기반의 AI 릴레이 서비스
 - [x] Job 생성 API
 - [x] UUID v7 적용
 - [x] Job 조회 API
-- [ ] 비동기 Job Processor
-- [ ] AI API 연동
-- [ ] Retry / Timeout
+- [x] 비동기 Job Processor
+- [x] AI API 연동
+- [x] Retry / Timeout
 - [ ] SSE
 - [ ] 부하 테스트

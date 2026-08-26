@@ -9,10 +9,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 public class JobServiceTest {
@@ -31,8 +32,8 @@ public class JobServiceTest {
         saved.setStatus(JobStatus.QUEUED);
         saved.setRetryCount(0);
 
-        when(jobRepository.save(any(Job.class)))
-            .thenReturn(Mono.just(saved));
+        given(jobRepository.save(any(Job.class)))
+                .willReturn(Mono.just(saved));
 
         Mono<Job> result = jobService.create("등록 테스트 프롬프트");
 
@@ -43,7 +44,7 @@ public class JobServiceTest {
             assertEquals(0, job.getRetryCount());
         }).verifyComplete();
 
-        verify(jobRepository).save(any(Job.class));
+        then(jobRepository).should().save(any(Job.class));
     }
 
     @Test
@@ -56,8 +57,8 @@ public class JobServiceTest {
         saved.setStatus(JobStatus.QUEUED);
         saved.setRetryCount(0);
 
-        when(jobRepository.findById(id))
-            .thenReturn(Mono.just(saved));
+        given(jobRepository.findById(id))
+                .willReturn(Mono.just(saved));
 
         Mono<Job> result = jobService.findById(id);
 
@@ -70,7 +71,7 @@ public class JobServiceTest {
                 })
                 .verifyComplete();
 
-        verify(jobRepository).findById(id);
+        then(jobRepository).should().findById(id);
     }
 
     @Test
@@ -83,11 +84,11 @@ public class JobServiceTest {
         saved.setStatus(JobStatus.QUEUED);
         saved.setRetryCount(0);
 
-        when(jobRepository.findById(id))
-            .thenReturn(Mono.just(saved));
+        given(jobRepository.findById(id))
+                .willReturn(Mono.just(saved));
 
-        when(jobRepository.save(any(Job.class)))
-            .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        given(jobRepository.save(any(Job.class)))
+                .willAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         Mono<Job> result = jobService.startJob(id);
 
@@ -98,8 +99,8 @@ public class JobServiceTest {
                 })
                 .verifyComplete();
 
-        verify(jobRepository).findById(id);
-        verify(jobRepository).save(saved);
+        then(jobRepository).should().findById(id);
+        then(jobRepository).should().save(saved);
     }
 
     @Test
@@ -112,8 +113,8 @@ public class JobServiceTest {
         saved.setStatus(JobStatus.QUEUED);
         saved.setRetryCount(0);
 
-        when(jobRepository.findByStatus(JobStatus.QUEUED))
-            .thenReturn(Flux.just(saved));
+        given(jobRepository.findByStatus(JobStatus.QUEUED))
+                .willReturn(Flux.just(saved));
 
         StepVerifier.create(jobService.findQueuedJobs())
                 .assertNext(job -> {
@@ -124,6 +125,6 @@ public class JobServiceTest {
                 })
                 .verifyComplete();
 
-        verify(jobRepository).findByStatus(JobStatus.QUEUED);
+        then(jobRepository).should().findByStatus(JobStatus.QUEUED);
     }
 }
