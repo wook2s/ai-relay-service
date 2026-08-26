@@ -26,3 +26,7 @@ WebFlux + R2DBC 기반의 AI 릴레이 서비스
 - [x] Retry / Timeout
 - [ ] SSE
 - [ ] 부하 테스트
+
+## NEXT STEP
+
+- [ ] 대화형 AI API로 기능 확장
