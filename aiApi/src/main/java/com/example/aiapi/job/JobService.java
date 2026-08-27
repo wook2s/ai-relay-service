@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class JobService {
     private final JobRepository jobRepository;
+    private final JobEventPublisher jobEventPublisher;
+    private final JobMapper jobMapper;
 
     public Mono<Job> create(String prompt) {
         Job job = new Job();
@@ -40,6 +42,9 @@ public class JobService {
                     job.setStatus(JobStatus.PROCESSING);
                     job.setStartedAt(LocalDateTime.now());
                     return jobRepository.save(job);
+                })
+                .doOnNext(job -> {
+                    jobEventPublisher.publish(job.getId(), jobMapper.toResponse(job));
                 });
     }
 
@@ -55,6 +60,9 @@ public class JobService {
                     job.setResult(result);
                     job.setCompletedAt(LocalDateTime.now());
                     return jobRepository.save(job);
+                })
+                .doOnNext(job -> {
+                    jobEventPublisher.publish(job.getId(), jobMapper.toResponse(job));
                 });
     }
 
@@ -64,6 +72,9 @@ public class JobService {
                 .flatMap(job ->  {
                     job.setStatus(JobStatus.FAILED);
                     return jobRepository.save(job);
+                })
+                .doOnNext(job -> {
+                    jobEventPublisher.publish(job.getId(), jobMapper.toResponse(job));
                 });
     }
 
@@ -74,6 +85,9 @@ public class JobService {
                     job.setStatus(JobStatus.QUEUED);
                     job.setRetryCount(job.getRetryCount() + 1);
                     return jobRepository.save(job);
+                })
+                .doOnNext(job -> {
+                    jobEventPublisher.publish(job.getId(), jobMapper.toResponse(job));
                 });
     }
 }

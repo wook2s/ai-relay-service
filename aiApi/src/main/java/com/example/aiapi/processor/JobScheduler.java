@@ -10,7 +10,7 @@ public class JobScheduler {
 
     private final JobWorker jobWorker;
 
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 30000)
     public void processJobs() {
         jobWorker.processQueuedJobs().subscribe();
     }
