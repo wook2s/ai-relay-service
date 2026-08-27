@@ -28,5 +28,6 @@ WebFlux + R2DBC 기반의 AI 릴레이 서비스
 - [ ] 부하 테스트
 
 ## NEXT STEP
-
+- [ ] Gemini Streaming API 연동
+- [ ] 스트리밍 응답을 SSE로 전달
 - [ ] 대화형 AI API로 기능 확장
