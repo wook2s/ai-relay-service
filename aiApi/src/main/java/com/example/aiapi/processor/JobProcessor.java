@@ -12,12 +12,11 @@ public class JobProcessor {
 
     private final JobService jobService;
 
-    @Qualifier("mockAiClient")
     private final AiClient aiClient;
 
     public JobProcessor(
             JobService jobService,
-            @Qualifier("geminiAiClient") AiClient aiClient
+            @Qualifier("mockAiClient") AiClient aiClient
     ) {
         this.jobService = jobService;
         this.aiClient = aiClient;
